@@ -1,13 +1,26 @@
 import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { supabase } from '../supabaseClient.js';
+import { syncFixturesToSupabase } from '../sportsFeed.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const publicDir = path.join(__dirname, '../public');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'newbet_super_secure_jwt_secret_2026';
 
 const app = express();
 app.use(cors({ origin: '*' }));
 app.use(express.json());
+app.use(express.static(publicDir));
+
+// Serve Landing page & Partner portal
+app.get('/', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
+app.get('/partners', (req, res) => res.sendFile(path.join(publicDir, 'partners.html')));
+app.get('/newbet.apk', (req, res) => res.download(path.join(publicDir, 'newbet.apk')));
 
 // --- Authentication Middleware ---
 async function authenticateUser(req, res, next) {
@@ -28,7 +41,7 @@ async function authenticateUser(req, res, next) {
 }
 
 // ----------------------------------------------------
-// Health Check
+// Health Check & Sports Feed Sync
 // ----------------------------------------------------
 app.get('/api/health', async (req, res) => {
   try {
@@ -43,6 +56,19 @@ app.get('/api/health', async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ status: 'error', error: err.message });
+  }
+});
+
+app.get('/api/sync/fixtures', async (req, res) => {
+  try {
+    const result = await syncFixturesToSupabase();
+    return res.json({
+      success: true,
+      message: 'Flux de données sportives synchronisé avec succès dans Supabase !',
+      ...result
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 });
 
@@ -674,3 +700,4 @@ app.get('/api/coupon/:code', (req, res) => {
 });
 
 export default app;
+

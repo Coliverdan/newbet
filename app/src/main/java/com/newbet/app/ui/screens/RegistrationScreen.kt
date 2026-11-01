@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.newbet.app.data.affiliate.AffiliateManager
 import com.newbet.app.data.affiliate.AttributionSource
 import com.newbet.app.ui.theme.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +44,7 @@ fun RegistrationScreen(
 ) {
     val context = LocalContext.current
     val clipboardManager = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    val coroutineScope = rememberCoroutineScope()
 
     var regType by remember { mutableStateOf("one_click") } // one_click, email
     var selectedCountry by remember { mutableStateOf("Bénin (XOF)") }
@@ -144,12 +146,23 @@ fun RegistrationScreen(
                     .clickable {
                         isSubmitting = true
                         affiliateManager.saveAttribution(promoCodeInput, AttributionSource.MANUAL_PROMO)
-                        Toast.makeText(
-                            context,
-                            "Connexion Google réussie ! Bienvenue sur Newbet !",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        onRegistrationSuccess()
+                        coroutineScope.launch {
+                            try {
+                                com.newbet.app.data.network.NewbetApiClient.loginWithGoogle(
+                                    email = "joueur.google@newbet.bj",
+                                    name = "Utilisateur Google",
+                                    promoCode = promoCodeInput
+                                )
+                            } catch (e: Exception) {
+                                // proceed
+                            }
+                            Toast.makeText(
+                                context,
+                                "Connexion Google réussie ! Bienvenue sur Newbet !",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            onRegistrationSuccess()
+                        }
                     },
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = CardSurface),
@@ -550,6 +563,19 @@ fun RegistrationScreen(
                         generatedId = "NB-$suffix"
                         generatedPassword = "NB_" + (1000..9999).random()
                         showCredentialsDialog = true
+
+                        coroutineScope.launch {
+                            try {
+                                com.newbet.app.data.network.NewbetApiClient.registerOneClick(
+                                    country = selectedCountry,
+                                    promoCode = promoCodeInput,
+                                    name = fullNameInput,
+                                    phone = optionalPhoneInput
+                                )
+                            } catch (e: Exception) {
+                                // optimistic local credentials preserved
+                            }
+                        }
                     } else {
                         // Email registration
                         Toast.makeText(context, "Compte Newbet créé ! Bonus 200% débloqué !", Toast.LENGTH_LONG).show()

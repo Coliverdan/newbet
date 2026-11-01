@@ -19,6 +19,7 @@ import com.newbet.app.ui.components.NewbetTopBar
 import com.newbet.app.ui.screens.*
 import com.newbet.app.ui.theme.BgCanvas
 import com.newbet.app.ui.theme.NewbetTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -41,6 +42,13 @@ class MainActivity : ComponentActivity() {
                 var balanceXOF by remember { mutableStateOf(25_400L) }
                 val bonusBalanceXOF by remember { mutableStateOf(5_000L) }
                 val isLoggedIn by remember { mutableStateOf(true) }
+
+                val coroutineScope = rememberCoroutineScope()
+
+                // Automatic Cloud Synchronization with Supabase & Vercel
+                LaunchedEffect(Unit) {
+                    sportsRepository.syncFixturesFromCloud()
+                }
 
                 val selectedBets = remember { mutableStateListOf<BetSelection>() }
                 val events by sportsRepository.events.collectAsState()
@@ -118,22 +126,10 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                            // 2. CASINO SCREEN (Real Aviator Crash, Slots, Live tables)
+                            // 2. CASINO SCREEN (Section Indisponible / En homologation)
                             composable("casino") {
                                 CasinoScreen(
-                                    casinoGames = casinoGames,
-                                    userBalanceXOF = balanceXOF,
-                                    onWinCasino = { winAmount ->
-                                        balanceXOF += winAmount
-                                    },
-                                    onBetCasino = { betAmount ->
-                                        if (balanceXOF >= betAmount) {
-                                            balanceXOF -= betAmount
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    }
+                                    onNavigateToSports = { navController.navigate("sports") }
                                 )
                             }
 
@@ -147,7 +143,9 @@ class MainActivity : ComponentActivity() {
                                     onPlaceBet = { stake, odds ->
                                         if (balanceXOF >= stake) {
                                             balanceXOF -= stake
-                                            sportsRepository.placeBet(selectedBets.toList(), stake)
+                                            coroutineScope.launch {
+                                                sportsRepository.placeBetCloud(selectedBets.toList(), stake)
+                                            }
                                             selectedBets.clear()
                                             true
                                         } else {
@@ -181,9 +179,11 @@ class MainActivity : ComponentActivity() {
                                 MyBetsScreen(
                                     placedBets = placedBets,
                                     onCashOutClick = { betId ->
-                                        val cashedAmount = sportsRepository.cashOut(betId)
-                                        if (cashedAmount > 0) {
-                                            balanceXOF += cashedAmount
+                                        coroutineScope.launch {
+                                            val cashedAmount = sportsRepository.cashOutCloud(betId)
+                                            if (cashedAmount > 0) {
+                                                balanceXOF += cashedAmount
+                                            }
                                         }
                                     },
                                     onNavigateToSports = { navController.navigate("sports") }
@@ -197,6 +197,9 @@ class MainActivity : ComponentActivity() {
                                     bonusBalanceXOF = bonusBalanceXOF,
                                     onDeposit = { amount ->
                                         balanceXOF += amount
+                                        coroutineScope.launch {
+                                            com.newbet.app.data.network.NewbetApiClient.deposit(amount, "Wave", "22997000000")
+                                        }
                                     },
                                     onWithdraw = { amount ->
                                         if (balanceXOF >= amount) {

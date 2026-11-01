@@ -1,9 +1,14 @@
 package com.newbet.app.data.repository
 
 import com.newbet.app.data.model.*
+import com.newbet.app.data.network.NewbetApiClient
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 
 class SportsRepository {
 
@@ -15,6 +20,50 @@ class SportsRepository {
 
     private val _placedBets = MutableStateFlow(getInitialMockBets())
     val placedBets: StateFlow<List<PlacedBet>> = _placedBets.asStateFlow()
+
+    suspend fun syncFixturesFromCloud(): Boolean = withContext(Dispatchers.IO) {
+        val result = NewbetApiClient.fetchFixtures()
+        if (result.isSuccess) {
+            val jsonArray = result.getOrNull()
+            if (jsonArray != null && jsonArray.length() > 0) {
+                val list = mutableListOf<SportEvent>()
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+                    val oddsObj = obj.optJSONObject("odds")
+                    val scoreStr = obj.optString("score", "")
+                    var scHome: Int? = null
+                    var scAway: Int? = null
+                    if (scoreStr.contains("-")) {
+                        val parts = scoreStr.split("-")
+                        scHome = parts.getOrNull(0)?.trim()?.toIntOrNull()
+                        scAway = parts.getOrNull(1)?.trim()?.toIntOrNull()
+                    }
+
+                    list.add(
+                        SportEvent(
+                            id = obj.optString("id", "fix_$i"),
+                            sport = obj.optString("sport", "Football"),
+                            league = obj.optString("league", "Compétition"),
+                            leagueFlag = obj.optString("homeFlag", "⚽"),
+                            homeTeam = obj.optString("homeTeam", "Équipe 1"),
+                            awayTeam = obj.optString("awayTeam", "Équipe 2"),
+                            minute = if (obj.optBoolean("isLive", false)) obj.optString("matchTime", "Live") else null,
+                            scoreHome = scHome,
+                            scoreAway = scAway,
+                            isLive = obj.optBoolean("isLive", false),
+                            startTime = obj.optString("matchTime", "20:00"),
+                            oddsHome = oddsObj?.optDouble("odds1", 2.0) ?: 2.0,
+                            oddsDraw = oddsObj?.optDouble("oddsX", 3.0) ?: 3.0,
+                            oddsAway = oddsObj?.optDouble("odds2", 2.5) ?: 2.5
+                        )
+                    )
+                }
+                _events.value = list
+                return@withContext true
+            }
+        }
+        return@withContext false
+    }
 
     fun placeBet(selections: List<BetSelection>, stakeXOF: Long): PlacedBet {
         val totalOdds = selections.fold(1.0) { acc, s -> acc * s.odds }
@@ -35,6 +84,27 @@ class SportsRepository {
         return bet
     }
 
+    suspend fun placeBetCloud(selections: List<BetSelection>, stakeXOF: Long): PlacedBet {
+        val localBet = placeBet(selections, stakeXOF)
+        withContext(Dispatchers.IO) {
+            try {
+                val jsonArr = JSONArray()
+                selections.forEach { sel ->
+                    jsonArr.put(JSONObject().apply {
+                        put("fixtureId", sel.eventId)
+                        put("match", sel.matchTitle)
+                        put("pick", sel.marketLabel)
+                        put("odds", sel.odds)
+                    })
+                }
+                NewbetApiClient.placeBet(jsonArr, stakeXOF)
+            } catch (e: Exception) {
+                // Keep local optimistic bet
+            }
+        }
+        return localBet
+    }
+
     fun cashOut(betId: String): Long {
         var returnAmount = 0L
         _placedBets.value = _placedBets.value.map { bet ->
@@ -44,6 +114,20 @@ class SportsRepository {
             } else bet
         }
         return returnAmount
+    }
+
+    suspend fun cashOutCloud(betId: String): Long {
+        val amount = cashOut(betId)
+        if (amount > 0) {
+            withContext(Dispatchers.IO) {
+                try {
+                    NewbetApiClient.executeCashOut(betId)
+                } catch (e: Exception) {
+                    // Ignore transient network errors
+                }
+            }
+        }
+        return amount
     }
 
     companion object {
