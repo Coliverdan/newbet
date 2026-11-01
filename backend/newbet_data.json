@@ -1,0 +1,207 @@
+{
+  "users": [
+    {
+      "id": "NB-948210",
+      "username": "Christian N.",
+      "email": "christian@newbet.bj",
+      "phone": "+229 61 00 00 00",
+      "authProvider": "google",
+      "googleId": "google_109283019283",
+      "balanceXOF": 37600,
+      "bonusXOF": 5000,
+      "promoCodeUsed": "NEWBET2026",
+      "referralCode": "NEW-CHRIS24",
+      "kycLevel": "NIVEAU 2 • VÉRIFIÉ",
+      "createdAt": "2026-11-01T11:24:01.544Z"
+    },
+    {
+      "id": "NB-226612",
+      "username": "Christian",
+      "email": "nb-226612@player.newbet.bj",
+      "phone": null,
+      "country": "B�nin",
+      "currency": "XOF",
+      "authProvider": "one_click",
+      "password": "NB_2IJ89BMD",
+      "balanceXOF": 25000,
+      "bonusXOF": 50000,
+      "promoCodeUsed": "NEWBET2026",
+      "referralCode": "NEW-6612",
+      "kycLevel": "NIVEAU 1 • ENREGISTRÉ",
+      "createdAt": "2026-11-01T11:24:16.163Z"
+    },
+    {
+      "id": "NB-709894",
+      "username": "Christian NGK",
+      "email": "christian.ngk@gmail.com",
+      "googleId": "goog_1793532268957",
+      "authProvider": "google",
+      "balanceXOF": 30000,
+      "bonusXOF": 50000,
+      "promoCodeUsed": "NEWBET2026",
+      "referralCode": "NEW-9894",
+      "kycLevel": "NIVEAU 2 • VÉRIFIÉ (GOOGLE)",
+      "createdAt": "2026-11-01T11:24:28.957Z"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "TX-90124",
+      "userId": "NB-948210",
+      "type": "DEPOSIT",
+      "amountXOF": 5000,
+      "method": "Wave",
+      "status": "COMPLETED",
+      "reference": "WAVE-B72F9",
+      "createdAt": "2026-11-01T11:24:01.556Z"
+    }
+  ],
+  "bets": [
+    {
+      "id": "BET-21594",
+      "userId": "NB-948210",
+      "date": "Aujourd'hui, 21:15",
+      "selections": [
+        {
+          "eventId": "ucl_1",
+          "matchTitle": "Real Madrid vs Manchester City",
+          "league": "UEFA Champions League",
+          "marketLabel": "Real Madrid (1)",
+          "odds": 2.15
+        }
+      ],
+      "stakeXOF": 1000,
+      "totalOdds": 2.15,
+      "potentialWinXOF": 2150,
+      "isLive": true,
+      "canCashOut": true,
+      "cashOutAmountXOF": 950,
+      "status": "PENDING",
+      "createdAt": "2026-11-01T11:24:01.556Z"
+    },
+    {
+      "id": "BET-79102",
+      "userId": "NB-948210",
+      "date": "Hier, 22:30",
+      "selections": [
+        {
+          "eventId": "laliga_1",
+          "matchTitle": "Barcelone vs Séville",
+          "league": "La Liga",
+          "marketLabel": "Barcelone (1)",
+          "odds": 1.45
+        }
+      ],
+      "stakeXOF": 10000,
+      "totalOdds": 1.45,
+      "potentialWinXOF": 14500,
+      "isLive": false,
+      "canCashOut": false,
+      "cashOutAmountXOF": 0,
+      "status": "WON",
+      "createdAt": "2026-10-31T11:24:01.556Z"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "ucl_1",
+      "sport": "Football",
+      "league": "UEFA Champions League",
+      "leagueFlag": "🇪🇺",
+      "homeTeam": "Real Madrid",
+      "awayTeam": "Manchester City",
+      "minute": "76'",
+      "scoreHome": 2,
+      "scoreAway": 1,
+      "isLive": true,
+      "startTime": "21:00",
+      "oddsHome": 2.15,
+      "oddsDraw": 3.6,
+      "oddsAway": 3.25,
+      "oddsOver25": 1.62,
+      "oddsUnder25": 2.2,
+      "oddsBttsYes": 1.5,
+      "oddsBttsNo": 2.4
+    },
+    {
+      "id": "epl_1",
+      "sport": "Football",
+      "league": "Premier League",
+      "leagueFlag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      "homeTeam": "Arsenal FC",
+      "awayTeam": "Liverpool FC",
+      "minute": "44'",
+      "scoreHome": 1,
+      "scoreAway": 1,
+      "isLive": true,
+      "startTime": "20:30",
+      "oddsHome": 2.4,
+      "oddsDraw": 3.3,
+      "oddsAway": 2.85,
+      "oddsOver25": 1.7,
+      "oddsUnder25": 2.05,
+      "oddsBttsYes": 1.58,
+      "oddsBttsNo": 2.25
+    },
+    {
+      "id": "ucl_2",
+      "sport": "Football",
+      "league": "UEFA Champions League",
+      "leagueFlag": "🇪🇺",
+      "homeTeam": "Paris Saint-Germain",
+      "awayTeam": "Bayern Munich",
+      "minute": null,
+      "scoreHome": null,
+      "scoreAway": null,
+      "isLive": false,
+      "startTime": "Ce soir 21:00",
+      "oddsHome": 2.25,
+      "oddsDraw": 3.75,
+      "oddsAway": 2.9,
+      "oddsOver25": 1.55,
+      "oddsUnder25": 2.35,
+      "oddsBttsYes": 1.48,
+      "oddsBttsNo": 2.5
+    },
+    {
+      "id": "laliga_1",
+      "sport": "Football",
+      "league": "La Liga",
+      "leagueFlag": "🇪🇸",
+      "homeTeam": "FC Barcelone",
+      "awayTeam": "Atletico Madrid",
+      "minute": null,
+      "scoreHome": null,
+      "scoreAway": null,
+      "isLive": false,
+      "startTime": "Demain 21:00",
+      "oddsHome": 1.82,
+      "oddsDraw": 3.7,
+      "oddsAway": 4.4,
+      "oddsOver25": 1.8,
+      "oddsUnder25": 1.95,
+      "oddsBttsYes": 1.72,
+      "oddsBttsNo": 2
+    },
+    {
+      "id": "can_1",
+      "sport": "Football",
+      "league": "Coupe d'Afrique des Nations",
+      "leagueFlag": "🌍",
+      "homeTeam": "Sénégal",
+      "awayTeam": "Côte d'Ivoire",
+      "minute": null,
+      "scoreHome": null,
+      "scoreAway": null,
+      "isLive": false,
+      "startTime": "Demain 18:00",
+      "oddsHome": 2.1,
+      "oddsDraw": 3.1,
+      "oddsAway": 3.65,
+      "oddsOver25": 2.15,
+      "oddsUnder25": 1.65,
+      "oddsBttsYes": 1.95,
+      "oddsBttsNo": 1.75
+    }
+  ]
+}
